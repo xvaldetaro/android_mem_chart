@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Logcat viewer</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
+  <script src="https://unpkg.com/vue-chartjs/dist/vue-chartjs.min.js"></script>
+  <script src="https://unpkg.com/vue"></script>
+</head>
+<body>
+  <div id="app" class="container is-size-7">
+
+    <div class="box is-danger" v-if="lines.connectionClosed">
+      Connection IS Closed
+    </div>
+
+    <div class="container">
+        <div class="field">
+            <label class="checkbox">
+              <input type="checkbox" @click="onPauseClicked" v-model="isPaused">
+              Pause
+            </label>
+          </div>
+
+      <div class="graphLabels">
+        <div class="graphLabel" v-for="pair in pairs">
+            <input type="checkbox" id="checkbox" v-model="enabledDataSets[pair[0]]">
+            <label for="checkbox">{{ pair[0] }}</label>
+            <div :style="{ backgroundColor: pair[1] }">{{ slices[pair[0]][ slices[pair[0]].length - 1 ] }}</div>
+        </div>
+      </div>
+      <div class="chartContainer">
+        <line-chart :chart-data="chartData"></line-chart>
+      </div>
+      <div style="height: 800px; overflow-y: scroll">
+        <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+          <thead>
+            <tr>
+              <th>Java Heap</th><th>Native Heap</th><th>Code</th><th>Graphics</th><th>Private Other</th><th>System</th><th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-bind:class="{ 'is-selected': (line === selected) }" v-on:click="selectLine(line)" v-for="line in linesComputed">
+              <td>{{ line.java_heap }}</td><td>{{ line.native_heap }}</td><td>{{ line.code }}</td><td>{{ line.graphics }}</td><td>{{ line.private_other }}</td>
+              <td>{{ line.system }}</td><td>{{ line.total }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+
+ const chartColors = {
+	red: 'rgb(255, 99, 132)',
+	orange: 'rgb(255, 159, 64)',
+	yellow: 'rgb(255, 205, 86)',
+	green: 'rgb(75, 192, 192)',
+	blue: 'rgb(54, 162, 235)',
+	purple: 'rgb(153, 102, 255)',
+	grey: 'rgb(201, 203, 207)'
+};
+          const pairs = [
+              ['java_heap', chartColors.blue],
+              ['native_heap', chartColors.orange],
+              ['graphics', chartColors.yellow],
+              ['code', chartColors.green],
+              ['private_other', chartColors.purple],
+              ['system', chartColors.grey],
+              ['total', '']
+          ]
+    let lines = {data: [], isPaused: false, connectionClosed: false};
+    let slices = {java_heap: [], native_heap: [], code: [], graphics: [], private_other: [], system: [], total: []}
+    let cleared = [];
+    const sliceCount = 20
+
+    function createDataset(name, color) {
+      return {
+        backgroundColor: color,
+        data: slices[name].slice(-1 * sliceCount)
+      }
+    }
+
+  Vue.component('line-chart', {
+    extends: VueChartJs.Line,
+    mixins: [VueChartJs.mixins.reactiveProp],
+    props: ['chartData'],
+    mounted () {
+      this.renderChart(this.chartData, {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 0
+        },
+        hover: {
+          animationDuration: 300,
+        },
+        responsiveAnimationDuration: 0,
+        legends: {
+          display: false
+        },
+        scales: {
+          xAxes: [{
+            display: true,
+            ticks: {
+              beginAtZero:true,
+              labelString: 'Type',
+            }
+          }],
+          yAxes: [{
+            stacked: true,
+            display: true,
+            ticks: {
+              beginAtZero:true,
+              labelString: 'mem',
+            }
+          }]
+        }
+      })
+    }
+  })
+    var app = new Vue({
+      el: '#app',
+      data: {
+        lines: lines,
+        slices: slices,
+        pairs: pairs,
+        enabledDataSets: { java_heap: true, native_heap: true, code: true, graphics: true, private_other: false, system: false },
+        selected: {},
+        isPaused: false,
+        isCollapsed: true,
+      },
+      methods: {
+        selectLine(line) {
+          this.selected = line;
+        },
+        onPauseClicked() {
+          this.isPaused = !this.isPaused;
+          this.lines.isPaused = this.isPaused;
+        },
+        clearLogs() {
+          this.lines.data = [];
+        },
+      },
+
+      computed: {
+        linesComputed() {
+          const slice = lines.data.slice(-50)
+          slice.reverse()
+          return slice
+        },
+        chartData() {
+          const last = slices.java_heap.length -1
+          const samples = []
+          for (let index = 0; index < sliceCount; index++) {
+            samples.push(index)
+          }
+          const datasets = []
+          this.pairs.forEach((pair) => {
+            if (this.enabledDataSets[pair[0]]) {
+              datasets.push(createDataset(pair[0], pair[1]))
+            }
+          })
+
+          const data = {
+            labels: samples,
+            datasets: datasets,
+          }
+          console.log(data)
+          return data
+        }
+      },
+    })
+
+    window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+    var connection = new WebSocket('ws://127.0.0.1:3000');
+
+    connection.onopen = function () {
+      // connection is opened and ready to use
+      console.log("Connection open")
+    };
+
+    connection.onclose = function (error) {
+      lines.connectionClosed = true;
+      console.log("Connection closed")
+    };
+
+    connection.onerror = function (error) {
+      lines.connectionClosed = true;
+      console.log("Connection error")
+    };
+
+    connection.onmessage = function (message) {
+      console.log('onMessage: '+message)
+      if (lines.isPaused) {
+        return;
+      }
+
+      if (lines.data.length > 50000) {
+        lines.data = lines.data.slice(-10000);
+      }
+
+      try {
+        var json = JSON.parse(message.data);
+
+        pairs.forEach((pair) => {
+          slices[pair[0]].push(json[pair[0]])
+        })
+        lines.data.push(json);
+      } catch (e) {
+        console.log('This doesn\'t look like a valid JSON: ',
+            message.data);
+        return;
+      }
+    };
+  </script>
+  <style type="text/css">
+  .collapsedCellMessage {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 500px;
+  }
+
+  .collapsedCellTag {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 150px;
+  }
+
+  .graphLabels {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .graphLabel {
+    border: 1px;
+    margin: 20px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .graphLabel > * {
+    margin: 8px;
+  }
+
+  .chartContainer {
+    height: 500px;
+  }
+  </style>
+</body>
+</html>

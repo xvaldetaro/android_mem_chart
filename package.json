@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "adbkit-logcat": "^2.0.1",
+    "chart.js": "^2.7.3",
+    "express": "^4.16.2",
+    "finalhandler": "^1.1.0",
+    "global": "^4.3.2",
+    "minimist": "^1.2.0",
+    "opn": "^5.1.0",
+    "serve-static": "^1.13.1",
+    "vue-chartjs": "^3.4.0",
+    "vue-cli": "^2.9.2",
+    "websocket": "^1.0.25"
+  }
+}

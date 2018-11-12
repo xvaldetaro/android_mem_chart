@@ -20,6 +20,7 @@ function extractData(data) {
   let relevantPiece = cut.substring(0, endIndex)
 
   let out = {}
+  try {
   out['java_heap'] = relevantPiece.match(/Java\s+Heap:\s+(\d+)/)[1]
   out['native_heap'] = relevantPiece.match(/Native\s+Heap:\s+(\d+)/)[1]
   out['code'] = relevantPiece.match(/Code:\s+(\d+)/)[1]
@@ -29,6 +30,9 @@ function extractData(data) {
   out['system'] = relevantPiece.match(/System:\s+(\d+)/)[1]
   out['total'] = relevantPiece.match(/TOTAL:\s+(\d+)/)[1]
   out['total_swap_pss'] = relevantPiece.match(/TOTAL\s+SWAP\s+PSS:\s+(\d+)/)[1]
+  } catch (e) {
+    return null
+  }
   return out
 }
 

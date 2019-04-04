@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Logcat viewer</title>
+  <title>Android Memory Chart</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.6.1/css/bulma.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
@@ -37,15 +37,16 @@
         <div style="height: 700px; overflow-y: scroll">
           <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
             <thead>
-              <tr>
-                <th>Step</th><th>Java Heap</th><th>Native Heap</th><th>Code</th><th>Graphics</th><th>Private Other</th><th>System</th><th>Total</th>
+              <tr class='linesTable'>
+                <th>Step</th><th>Java Heap</th><th>Native Heap</th><th>Code</th><th>Graphics</th><th>Private Other</th><th>System</th><th>Total</th><th>Save</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-bind:class="{ 'is-selected': (line === selected) }" v-on:click="selectLine(line)" v-for="line in linesComputed">
+              <tr v-bind:class="{ 'is-selected': (line === selected) }" v-for="line in linesComputed">
                 <td>{{ line.step }}</td>
                 <td>{{ line.java_heap }}</td><td>{{ line.native_heap }}</td><td>{{ line.code }}</td><td>{{ line.graphics }}</td><td>{{ line.private_other }}</td>
                 <td>{{ line.system }}</td><td>{{ line.total }}</td>
+                <td class='button lineButton' v-on:click="selectLine(line)">&#9745</td>
               </tr>
             </tbody>
           </table>
@@ -59,12 +60,13 @@
         <div style="height: 700px; overflow-y: scroll">
           <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
             <thead>
-              <tr>
-                <th>Step</th><th>Java Heap</th><th>Native Heap</th><th>Code</th><th>Graphics</th><th>Private Other</th><th>System</th><th>Total</th>
+              <tr class='snapshotTable'>
+                <th>Remove</th><th>Step</th><th>Java Heap</th><th>Native Heap</th><th>Code</th><th>Graphics</th><th>Private Other</th><th>System</th><th>Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-on:click="selectSnapshot(line)" v-for="line in reverseSnapshots">
+              <tr v-for="line in reverseSnapshots">
+                <td class='button snapshotButton' v-on:click="selectSnapshot(line)">&#9746</td>
                 <td>{{ line.step }}</td>
                 <td>{{ line.java_heap }}</td><td>{{ line.native_heap }}</td><td>{{ line.code }}</td><td>{{ line.graphics }}</td><td>{{ line.private_other }}</td>
                 <td>{{ line.system }}</td><td>{{ line.total }}</td>
@@ -321,6 +323,31 @@
 
     .chartContainer {
       height: 500px;
+    }
+
+    .button {
+      background-color: #eff3f6;
+      background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+      font-weight: bold;
+      width: 100%;
+    }
+
+    .snapshotButton {
+      color: #ec0d0d;
+    }
+
+    .lineButton {
+      color: #3cbd01;
+    }
+
+    tr.linesTable th:last-child{
+      width:1%;
+      white-space:nowrap;
+    }
+
+    tr.snapshotTable th:first-child{
+      width:1%;
+      white-space:nowrap;
     }
   </style>
 </body>

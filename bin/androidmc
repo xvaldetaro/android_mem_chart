@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+
+var server = require('../src/server.js');
+
+let namespace = process.argv[2]
+if (!namespace) {
+  console.log('Usage: androidmc <process.name>\nex: androidmc com.company.build.flavor\nyou can find all process name by calling \'adb shell dumpsys meminfo\'')
+  process.exit(1)
+}
+server(namespace)

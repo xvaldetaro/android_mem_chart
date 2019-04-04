@@ -5,9 +5,9 @@ The tool is just a simple loop calling `adb shell dumpsys meminfo`, parsing the 
 
 ## Instalation
 ##### NPM/Yarn
-`npm install -g git+https://git@github.com/xvaldetaro/android_mem_chart`
+`npm install -g android_mem_chart`
 or
-`yarn global add git+https://git@github.com/xvaldetaro/android_mem_chart`
+`yarn global add android_mem_chart`
 
 ##### By cloning
 ```

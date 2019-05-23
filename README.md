@@ -1,26 +1,29 @@
-# Android Memory Chart
-A tiny tool with a web server and client that shows a line (updates every second) graph of the Android memory usage, broken down by type.
+# mem2
 
-The tool is just a simple loop calling `adb shell dumpsys meminfo`, parsing the desired results, and pushing it to the live client via Websockets
-
-## Instalation
-##### NPM/Yarn
-`npm install -g android_mem_chart`
-or
-`yarn global add android_mem_chart`
-
-##### By cloning
+## Project setup
 ```
-git clone https://github.com/xvaldetaro/android_mem_chart
-cd android_mem_chart
-npm install
-./bin/androidmc <process.name>
+yarn install
 ```
 
-## Usage
-Find the process name. You can call `adb shell dumpsys meminfo` and see all processes there in order to pick which one.
-then:
-`androidmc <process.name>`
+### Compiles and hot-reloads for development
+```
+yarn run serve
+```
 
-## Screenshot
-![](https://github.com/xvaldetaro/android_mem_chart/blob/screenshots/screenshots/amc_screenshot.png?raw=true)
+### Compiles and minifies for production
+```
+yarn run build
+```
+
+### Run your tests
+```
+yarn run test
+```
+
+### Lints and fixes files
+```
+yarn run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).

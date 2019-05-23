@@ -1,36 +1,57 @@
 {
-  "name": "android_mem_chart",
-  "version": "1.0.0",
-  "description": "A simple graph showing android memory usage",
-  "bin": { "androidmc" : "./bin/androidmc" },
+  "name": "mem2",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "androidmc": "./bin/androidmc"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build && npm run build-server",
+    "lint": "vue-cli-service lint",
+    "bin": "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}' ./src/server/server.ts",
+    "build-server": "rm -rf local && tsc --outDir temp -p ./tsconfig.json -m commonjs && mkdir local && mv -f temp/server/* local && rm -rf temp && chmod +x local/server.js",
+    "prepare": "npm run build"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xvaldetaro/android_mem_chart.git"
-  },
-  "keywords": [
-    "android",
-    "memory",
-    "dumpsys",
-    "chart",
-    "websocket",
-    "vue"
-  ],
-  "author": "Alexandre Valdetaro",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/xvaldetaro/android_mem_chart/issues"
-  },
-  "homepage": "https://github.com/xvaldetaro/android_mem_chart#readme",
   "dependencies": {
-    "adbkit-logcat": "^2.0.1",
-    "express": "^4.16.2",
-    "finalhandler": "^1.1.0",
-    "global": "^4.3.2",
-    "opn": "^5.1.0",
-    "serve-static": "^1.13.1",
-    "websocket": "^1.0.25"
-  }
+    "bulma": "^0.7.5",
+    "chart.js": "^2.8.0",
+    "core-js": "^2.6.7",
+    "js-base64": "^2.5.1",
+    "vue": "^2.6.10",
+    "vue-chartjs": "^3.4.2",
+    "vue-class-component": "^7.0.2",
+    "vue-property-decorator": "^8.1.0"
+  },
+  "devDependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@types/ramda": "^0.26.8",
+    "@types/websocket": "^0.0.40",
+    "@types/finalhandler": "^1.1.0",
+    "@types/js-base64": "^2.3.1",
+    "@types/opn": "^5.5.0",
+    "@vue/cli-plugin-babel": "^3.7.0",
+    "@vue/cli-plugin-typescript": "^3.7.0",
+    "@vue/cli-service": "^3.7.0",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^7.1.0",
+    "tsconfig-paths": "^3.8.0",
+    "opn": "^6.0.0",
+    "typescript": "^3.4.3",
+    "ramda": "^0.26.1",
+    "finalhandler": "^1.1.2",
+    "serve-static": "^1.14.1",
+    "rxjs": "^6.5.2",
+    "vue-template-compiler": "^2.5.21",
+    "websocket": "^1.0.28"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ]
 }

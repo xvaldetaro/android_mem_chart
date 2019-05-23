@@ -1,0 +1,30 @@
+export enum RawKind {
+    NativeHeap = 'NativeHeap',
+    DalvikHeap = 'DalvikHeap',
+    DalvikOther = 'DalvikOther',
+    Stack = 'Stack',
+    Ashmem = 'Ashmem',
+    GfxDev = 'GfxDev',
+    OtherDev = 'OtherDev',
+    soMmap = 'soMmap',
+    apkMmap = 'apkMmap',
+    ttfMmap = 'ttfMmap',
+    dexMmap = 'dexMmap',
+    oatMmap = 'oatMmap',
+    artMmap = 'artMmap',
+    OtherMmap = 'OtherMmap',
+    Unknown = 'Unknown',
+    TotalRaw = 'TotalRaw',
+}
+
+export enum SummaryKind {
+    JavaHeap = 'JavaHeap',
+    NativeHeap = 'NativeHeap',
+    Code = 'Code',
+    Stack = 'Stack',
+    Graphics = 'Graphics',
+    PrivateOther = 'PrivateOther',
+    System = 'System',
+    Total = 'Total',
+    TotalSwapPss = 'TotalSwapPss',
+}

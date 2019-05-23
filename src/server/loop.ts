@@ -57,7 +57,6 @@ function startServer(parsedObservable: Observable<DumpRow>, options: Options) {
     }
 
     const dist = path.join(__dirname, '../dist');
-    console.log(dist)
     const serve = serveStatic(dist);
     const httpServer = http.createServer((request, response) => {
         serve(request, response, finalhandler(request, response))

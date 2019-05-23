@@ -1,6 +1,6 @@
 {
   "name": "android_mem_chart",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "description": "A simple graph showing android memory usage",
   "bin": {
     "androidmc": "./bin/androidmc"
@@ -10,20 +10,16 @@
     "build": "vue-cli-service build && npm run build-server",
     "lint": "vue-cli-service lint",
     "bin": "ts-node -r tsconfig-paths/register -O '{\"module\": \"commonjs\"}' ./src/server/server.ts",
-    "build-server": "rm -rf local && tsc --outDir temp -p ./tsconfig.json -m commonjs && mkdir local && mv -f temp/server/* local && rm -rf temp && chmod +x local/server.js",
-    "prepare": "npm run build"
+    "build-server": "rm -rf local && tsc --outDir temp -p ./tsconfig.json -m commonjs && mkdir local && mv -f temp/server/* local && rm -rf temp && chmod +x local/server.js"
   },
   "dependencies": {
-    "bulma": "^0.7.5",
     "chart.js": "^2.8.0",
     "core-js": "^2.6.7",
     "js-base64": "^2.5.1",
     "vue": "^2.6.10",
     "vue-chartjs": "^3.4.2",
     "vue-class-component": "^7.0.2",
-    "vue-property-decorator": "^8.1.0"
-  },
-  "devDependencies": {
+    "vue-property-decorator": "^8.1.0",
     "@babel/runtime": "^7.4.4",
     "@types/ramda": "^0.26.8",
     "@types/websocket": "^0.0.40",

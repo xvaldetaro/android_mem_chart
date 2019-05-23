@@ -1,7 +1,7 @@
 {
-  "name": "mem2",
-  "version": "0.1.0",
-  "private": true,
+  "name": "android_mem_chart",
+  "version": "1.1.0",
+  "description": "A simple graph showing android memory usage",
   "bin": {
     "androidmc": "./bin/androidmc"
   },

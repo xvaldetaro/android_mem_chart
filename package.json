@@ -37,6 +37,7 @@
     "sass-loader": "^7.1.0",
     "tsconfig-paths": "^3.8.0",
     "opn": "^6.0.0",
+    "tar": ">=4.4.2",
     "typescript": "^3.4.3",
     "ramda": "^0.26.1",
     "finalhandler": "^1.1.2",

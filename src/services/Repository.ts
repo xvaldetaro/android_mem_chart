@@ -6,9 +6,15 @@ export interface DumpByKind {
     [key: string]: number[];
 }
 
+export interface KindDumpMeta {
+    diffPercent: number;
+    value: number;
+}
+
+export interface DumpRowMeta { kinds: {[key: string]: KindDumpMeta}, step: string}
+
 export class Repository {
-    public rows: DumpRow[] = [];
-    public steps: string[] = [];
+    public rowsMeta: DumpRowMeta[] = [];
     private dumpByKind: DumpByKind = {};
     private step: number = 0;
     private excludeKinds: ExcludedKinds;
@@ -22,7 +28,7 @@ export class Repository {
     }
 
     public toChartData(count: number): ChartData {
-        const labels: string[] = this.sliceSteps(count);
+        const labels: string[] = this.sliceRows(count).map((meta) => meta.step);
         for (let index = labels.length; index < count; index++) {
             labels[index] = '_'
         }
@@ -37,36 +43,61 @@ export class Repository {
         return {labels, datasets};
     }
 
-    public sliceRows(count: number): DumpRow[] {
-        return this.rows.slice(-1 * count);
-    }
-
-    public sliceSteps(count: number): string[] {
-        return this.steps.slice(-1 * count);
+    public sliceRows(count: number): DumpRowMeta[] {
+        return this.rowsMeta.slice(-1 * count);
     }
 
     public deleteRow(step: string) {
-        const index = this.steps.findIndex((e) => e === step)
+        const index = this.rowsMeta.findIndex((e) => e.step === step)
         if (index !== -1) {
-            this.steps.splice(index, 1)
-            this.rows.splice(index, 1)
+            this.rowsMeta.splice(index, 1)
             Object.keys(this.dumpByKind).forEach((key) => this.dumpByKind[key].splice(index, 1));
         }
     }
 
+    public pushRowMeta(meta: DumpRowMeta) {
+        if (this.rowsMeta.length > 50000) {
+            this.rowsMeta = this.rowsMeta.slice(-10000);
+        }
+
+        let step = meta.step;
+        this.step += 1;
+        if (!step) {
+            step = this.step.toString();
+        }
+        this.schema.forEach((kind) => {
+            this.dumpByKind[kind].push(meta.kinds[kind].value)
+        });
+        return this.rowsMeta.push({ kinds: Object.assign({}, meta.kinds), step});
+    }
+
     public pushRow(row: DumpRow, step?: string) {
-        if (this.rows.length > 50000) {
-            this.rows = this.rows.slice(-10000);
+        if (this.rowsMeta.length > 50000) {
+            this.rowsMeta = this.rowsMeta.slice(-10000);
         }
 
         this.step += 1;
         if (!step) {
             step = this.step.toString();
         }
-        this.steps.push(step);
         this.schema.forEach((kind) => {
             this.dumpByKind[kind].push(row[kind])
         });
-        this.rows.push(row);
+        const previous = this.rowsMeta.length !== 0 && this.rowsMeta[this.rowsMeta.length - 1] || null;
+        this.rowsMeta.push(this.getMeta(row, previous, step))
+    }
+
+    private getMeta(row: DumpRow, previous: DumpRowMeta | null, step: string): DumpRowMeta {
+        const meta: DumpRowMeta = { kinds: {}, step};
+        if (!previous) {
+            this.schema.forEach((kind) => {
+                meta.kinds[kind] = { diffPercent: 0, value: row[kind] }
+            });
+        } else {
+            this.schema.forEach((kind) => {
+                meta.kinds[kind] = {diffPercent: row[kind] / previous.kinds[kind].value, value: row[kind]}
+            });
+        }
+        return meta
     }
 }

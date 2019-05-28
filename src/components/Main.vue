@@ -30,10 +30,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="pair in dumpRows">
-                              <td>{{ pair.step }}</td>
-                              <td v-for="kind in kinds">{{ pair.row[kind] }}</td>
-                              <td class='button lineButton' v-on:click="saveRowSnapshot(pair)">&#9745</td>
+                          <tr v-for="meta in dumpRows">
+                              <td>{{ meta.step }}</td>
+                              <td v-for="kind in kinds">{{ meta.kinds[kind].value }}</td>
+                              <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
                           </tr>
                         </tbody>
                     </table>
@@ -57,10 +57,10 @@
                         </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="pair in snapRows">
-                                <td class='button snapshotButton' v-on:click="deleteRowSnapshot(pair)">&#9746</td>
-                                <td>{{ pair.step }}</td>
-                                <td v-for="kind in kinds">{{ pair.row[kind] }}</td>
+                            <tr v-for="meta in snapRows">
+                                <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
+                                <td>{{ meta.step }}</td>
+                                <td v-for="kind in kinds">{{ meta.kinds[kind].value }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -74,15 +74,10 @@
     // @ts-ignore
     import Chart from './Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
-    import {Repository} from '@/services/Repository';
+    import {DumpRowMeta, Repository} from '@/services/Repository';
     import {DumpRow, Payload} from '@/shared/SharedTypes';
     import {ServerStream} from '@/services/ServerStream';
     import {ExcludedKinds} from '@/services/ExcludedKinds';
-
-    interface RowWithStep {
-        step: string,
-        row: DumpRow,
-    }
 
     @Component({
         components: {
@@ -133,30 +128,28 @@
             this.saveKinds()
         }
 
-        private saveRowSnapshot(pair: RowWithStep) {
-            this.snapRepo.pushRow(pair.row, pair.step)
+        private saveRowSnapshot(meta: DumpRowMeta) {
+            this.snapRepo.pushRowMeta(meta);
             this.snapChartData = this.snapRepo.toChartData(this.stepCount)
         }
 
-        private deleteRowSnapshot(pair: RowWithStep) {
-            this.snapRepo.deleteRow(pair.step);
+        private deleteRowSnapshot(meta: DumpRowMeta) {
+            this.snapRepo.deleteRow(meta.step);
             this.snapChartData = this.snapRepo.toChartData(this.stepCount)
         }
 
-        private get dumpRows(): RowWithStep[] {
+        private get dumpRows(): DumpRowMeta[] {
             return this.computeRows(this.dumpRepo)
         }
 
-        private get snapRows(): RowWithStep[] {
+        private get snapRows(): DumpRowMeta[] {
             return this.computeRows(this.snapRepo)
         }
 
-        private computeRows(repo: Repository): RowWithStep[] {
-            const rowSlice = repo.rows.slice(-50);
-            const stepSlice = repo.steps.slice(-50);
-            const pairs = rowSlice.map((row, index) => ({row, step: stepSlice[index]}));
-            pairs.reverse();
-            return pairs;
+        private computeRows(repo: Repository): DumpRowMeta[] {
+            const rowSlice = repo.rowsMeta.slice(-100);
+            rowSlice.reverse();
+            return rowSlice;
         }
 
         private get isDisconnected(): boolean {
@@ -176,24 +169,39 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    .rootContainer {
+        box-sizing: border-box;
+        height: 100%;
+    }
+
     .mainContainer {
+        box-sizing: border-box;
         display: flex;
         flex-direction: row;
         justify-content: space-evenly;
         padding-bottom: 40px;
+        height: 100%;
     }
 
     .sideContainer {
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         width: 700px;
         border: 1px solid #d4d4d4;
         border-radius: 10px;
+        height: 100%;
+        padding-bottom: 25px;
     }
 
     .sideContainer > div {
-        margin: 0 25px 0 25px;
+        margin-left: 25px;
+        margin-right: 25px;
+    }
+
+    .sideContainer > div:not(:first-child) {
+        margin-top: 40px;
     }
 
     .sideContainer .header {
@@ -209,10 +217,10 @@
 
     .tableContainer {
         flex-grow: 1;
+        overflow-y: scroll;
     }
 
     .chartContainer {
-        margin-bottom: 40px;
     }
 
     .button {

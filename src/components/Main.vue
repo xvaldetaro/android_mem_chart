@@ -247,37 +247,32 @@
         color: #3cbd01;
     }
 
-    tr:nth-child(even) {
-        background-color: #f2f2f2
-    }
-
     table {
         border-collapse: collapse;
         overflow-y: scroll;
         overflow-x: hidden;
+        width: 100%;
     }
 
     th {
-        font-size: 12px;
-        padding: 4px 8px 4px 8px;
+        background-color: #2c3e50;
+        color: ghostwhite;
+        font-size: 13px;
+        padding: 8px 4px 8px 4px;
     }
 
-    table, th, td {
-        border: 1px solid #030303;
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
     }
 
-    tr.linesTable th:last-child {
-        width: 1%;
-        white-space: nowrap;
+    td {
+        font-size: 14px;
+        padding: 6px 2px 6px 2px;
+        border-right: 1px solid #d2d2d2;
     }
 
-    tr.snapshotTable th:first-child {
-        width: 1%;
-        white-space: nowrap;
+    td:last-child {
+        border-right: 0;
     }
 
-    .connectionClosedContainer {
-        color: white;
-        background-color: red;
-    }
 </style>

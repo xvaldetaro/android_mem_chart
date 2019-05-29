@@ -1,6 +1,5 @@
 export const kindToColor = (kind: string) => {
     const color = intToRGB(hashCode(kind))
-    console.log(color)
     return '#' + color
 };
 

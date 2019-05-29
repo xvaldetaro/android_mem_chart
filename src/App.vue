@@ -46,4 +46,8 @@
         height: 100vh;
         width: 100%;
     }
+
+    body {
+        margin: 0;
+    }
 </style>

@@ -1,18 +1,13 @@
 <template>
     <div v-if="schema" class="rootContainer">
-        <div class="connectionClosedContainer" v-if="isDisconnected">
-            Connection IS Closed
-        </div>
-
-        <div class="pauseContainer">
-            <label>
-                <input type="checkbox" @click="onPauseClicked" v-model="isPaused">
-                Pause
-            </label>
-        </div>
-
         <div class="mainContainer">
-
+            <Menu
+                    :isPaused="isPaused"
+                    @pause-clicked="onPauseClicked"
+                    :showDiffs="showDiffs"
+                    @show-diffs-clicked="onShowDiffsClicked"
+                    :isConnected="isConnected"
+            />
             <div class="sideContainer dumpContainer">
                 <div class="header">
                     Dump Data
@@ -32,7 +27,9 @@
                         <tbody>
                           <tr v-for="meta in dumpRows">
                               <td>{{ meta.step }}</td>
-                              <td v-for="kind in kinds">{{ meta.kinds[kind].value }}</td>
+                              <td v-for="kind in kinds">
+                                  <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs" />
+                              </td>
                               <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
                           </tr>
                         </tbody>
@@ -60,7 +57,9 @@
                             <tr v-for="meta in snapRows">
                                 <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
                                 <td>{{ meta.step }}</td>
-                                <td v-for="kind in kinds">{{ meta.kinds[kind].value }}</td>
+                                <td v-for="kind in kinds">
+                                    <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs" />
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -78,9 +77,13 @@
     import {DumpRow, Payload} from '@/shared/SharedTypes';
     import {ServerStream} from '@/services/ServerStream';
     import {ExcludedKinds} from '@/services/ExcludedKinds';
+    import CellWithDiff from '@/components/CellWithDiff.vue';
+    import Menu from '@/components/Menu.vue';
 
     @Component({
         components: {
+            Menu,
+            CellWithDiff,
             Chart,
         },
     })
@@ -92,6 +95,7 @@
 
         private stepCount = 20;
         private isPaused = false;
+        private showDiffs = true;
         private excludedKinds = new ExcludedKinds(this.schema);
         private kinds: string[] = [];
         private dumpRepo = new Repository(this.excludedKinds, this.schema);
@@ -115,6 +119,10 @@
                     }
                 });
             }
+        }
+
+        private onShowDiffsClicked() {
+            this.showDiffs = !this.showDiffs;
         }
 
         private onPauseClicked() {
@@ -152,8 +160,8 @@
             return rowSlice;
         }
 
-        private get isDisconnected(): boolean {
-            return !this.server.isConnected
+        private get isConnected(): boolean {
+            return this.server.isConnected
         }
 
         private get labels(): string[] {
@@ -184,6 +192,7 @@
     }
 
     .sideContainer {
+        margin: 10px;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;

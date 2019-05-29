@@ -95,7 +95,17 @@ export class Repository {
             });
         } else {
             this.schema.forEach((kind) => {
-                meta.kinds[kind] = {diffPercent: row[kind] / previous.kinds[kind].value, value: row[kind]}
+                let diff = 100
+                if (previous.kinds[kind].value === 0) {
+                    if (row[kind] > 0) {
+                        diff = 100;
+                    } else {
+                        diff = 0;
+                    }
+                } else {
+                    diff = (row[kind] - previous.kinds[kind].value) / previous.kinds[kind].value;
+                }
+                meta.kinds[kind] = {diffPercent: diff, value: row[kind]}
             });
         }
         return meta

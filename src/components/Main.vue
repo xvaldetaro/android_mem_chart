@@ -1,78 +1,70 @@
 <template>
-    <div v-if="schema" class="rootContainer">
-        <div class="mainContainer">
-            <Menu
-                    :isPaused="isPaused"
-                    @pause-clicked="onPauseClicked"
-                    :showDiffs="showDiffs"
-                    @show-diffs-clicked="onShowDiffsClicked"
-                    :isConnected="isConnected"
-                    @clear="clear"
-                    @copy-csv="copyCsv"
-                    @copy-json="copyJson"
-                    @save-csv="saveCsv"
-                    @save-json="saveJson"
-                    @save-state="saveState"
-                    @load-state="loadState"
-            />
-            <div class="sideContainer dumpContainer">
-                <div class="header">
-                    Dump Data
-                </div>
-                <div class="chartContainer">
-                    <Chart :chart-data="dumpChartData" :on-label-click="toggleKind"></Chart>
-                </div>
-                <div class="tableContainer">
-                    <table>
-                        <thead>
-                        <tr class='linesTable'>
-                            <th>#</th>
-                            <th v-for="name in labels">{{ name }}</th>
-                            <th>Save</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                          <tr v-for="meta in dumpRows">
-                              <td>{{ meta.step }}</td>
-                              <td v-for="kind in kinds">
-                                  <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs" />
-                              </td>
-                              <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
-                          </tr>
-                        </tbody>
-                    </table>
-                </div>
+    <div class="mainContainer">
+        <Menu
+                :isPaused="isPaused"
+                @pause-clicked="onPauseClicked"
+                :showDiffs="showDiffs"
+                @show-diffs-clicked="onShowDiffsClicked"
+                :isConnected="isConnected"
+                @clear="clear"
+                @copy-csv="copyCsv"
+                @copy-json="copyJson"
+                @save-csv="saveCsv"
+                @save-json="saveJson"
+                @save-state="saveState"
+                @load-state="loadState"
+        />
+        <Panel header="'Dump Data'">
+            <div class="chartContainer">
+                <Chart :chart-data="dumpChartData" :on-label-click="toggleKind"></Chart>
             </div>
+            <div class="tableContainer">
+                <table>
+                    <thead>
+                    <tr class='linesTable'>
+                        <th>#</th>
+                        <th v-for="name in labels">{{ name }}</th>
+                        <th class="lineButton"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="meta in dumpRows">
+                        <td>{{ meta.step }}</td>
+                        <td v-for="kind in kinds">
+                            <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs"/>
+                        </td>
+                        <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Panel>
 
-            <div class="sideContainer">
-                <div class="header">
-                    Snapshots
-                </div>
-                <div class="chartContainer">
-                    <Chart :chart-data="snapChartData" :on-label-click="toggleKind"></Chart>
-                </div>
-                <div class="tableContainer">
-                    <table>
-                        <thead>
-                        <tr class='snapshotTable'>
-                            <th>Delete</th>
-                            <th>#</th>
-                            <th v-for="name in labels">{{ name }}</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="meta in snapRows">
-                                <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
-                                <td>{{ meta.step }}</td>
-                                <td v-for="kind in kinds">
-                                    <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <Panel header="'Snapshots'">
+            <div class="chartContainer">
+                <Chart :chart-data="snapChartData" :on-label-click="toggleKind"></Chart>
             </div>
-        </div>
+            <div class="tableContainer">
+                <table>
+                    <thead>
+                    <tr class='snapshotTable'>
+                        <th></th>
+                        <th>#</th>
+                        <th v-for="name in labels">{{ name }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="meta in snapRows">
+                        <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
+                        <td>{{ meta.step }}</td>
+                        <td v-for="kind in kinds">
+                            <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Panel>
     </div>
 </template>
 
@@ -87,9 +79,11 @@
     import CellWithDiff from '@/components/CellWithDiff.vue';
     import Menu from '@/components/Menu.vue';
     import {PersistState} from '@/services/PersistState';
+    import Panel from '@/components/Panel.vue';
 
     @Component({
         components: {
+            Panel,
             Menu,
             CellWithDiff,
             Chart,
@@ -116,14 +110,14 @@
             this.saveKinds();
             if (this.fileDump) {
                 this.fileDump.forEach((row) => {
-                    this.dumpRepo.pushRow(row)
-                    this.dumpChartData = this.dumpRepo.toChartData(this.stepCount)
-                })
+                    this.dumpRepo.pushRow(row);
+                    this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
+                });
             } else {
                 this.server.setDumpListener((row: DumpRow) => {
                     if (!this.isPaused) {
-                        this.dumpRepo.pushRow(row)
-                        this.dumpChartData = this.dumpRepo.toChartData(this.stepCount)
+                        this.dumpRepo.pushRow(row);
+                        this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
                     }
                 });
             }
@@ -184,27 +178,27 @@
 
         private toggleKind(kind: string) {
             this.excludedKinds.toggle(kind);
-            this.dumpChartData = this.dumpRepo.toChartData(this.stepCount)
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount)
-            this.saveKinds()
+            this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
+            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
+            this.saveKinds();
         }
 
         private saveRowSnapshot(meta: DumpRowMeta) {
             this.snapRepo.pushRowMeta(meta);
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount)
+            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
         }
 
         private deleteRowSnapshot(meta: DumpRowMeta) {
             this.snapRepo.deleteRow(meta.step);
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount)
+            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
         }
 
         private get dumpRows(): DumpRowMeta[] {
-            return this.computeRows(this.dumpRepo)
+            return this.computeRows(this.dumpRepo);
         }
 
         private get snapRows(): DumpRowMeta[] {
-            return this.computeRows(this.snapRepo)
+            return this.computeRows(this.snapRepo);
         }
 
         private computeRows(repo: Repository): DumpRowMeta[] {
@@ -214,7 +208,7 @@
         }
 
         private get isConnected(): boolean {
-            return this.server.isConnected
+            return this.server.isConnected;
         }
 
         private get labels(): string[] {
@@ -222,18 +216,14 @@
         }
 
         private saveKinds(): string[] {
-            this.kinds = this.schema.filter((kind) => !this.excludedKinds.isExcluded(kind)).map((kind) => kind)
-            return this.kinds
+            this.kinds = this.schema.filter((kind) => !this.excludedKinds.isExcluded(kind)).map((kind) => kind);
+            return this.kinds;
         }
     }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-    .rootContainer {
-        box-sizing: border-box;
-        height: 100%;
-    }
 
     .mainContainer {
         box-sizing: border-box;
@@ -244,45 +234,13 @@
         height: 100%;
     }
 
-    .sideContainer {
-        margin: 10px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        flex-grow: 1;
-        width: 700px;
-        border: 1px solid #d4d4d4;
-        border-radius: 10px;
-        height: 100%;
-        padding-bottom: 25px;
-    }
-
-    .sideContainer > div {
-        margin-left: 25px;
-        margin-right: 25px;
-    }
-
-    .sideContainer > div:not(:first-child) {
-        margin-top: 40px;
-    }
-
-    .sideContainer .header {
-        border-bottom: 1px solid #d4d4d4;
-        margin: 0;
-        padding: 12px;
-        font-size: 16px;
-    }
-
-    .dumpContainer {
-        margin-right: 10px;
+    .mainContainer div:not(:last-child) {
+        margin-right: 20px;
     }
 
     .tableContainer {
         flex-grow: 1;
         overflow-y: scroll;
-    }
-
-    .chartContainer {
     }
 
     .button {

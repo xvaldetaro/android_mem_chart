@@ -3,7 +3,7 @@ import {interval, Observable, Subscriber} from 'rxjs';
 import {share, switchMap} from 'rxjs/operators';
 
 export function createDumpObservable(namespace: string): Observable<string> {
-    return interval(1000).pipe(
+    return interval(2000).pipe(
         switchMap(() => {
             return new Observable<string>((subscriber) => {
                 pull(subscriber, namespace)

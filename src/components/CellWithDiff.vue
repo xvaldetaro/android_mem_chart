@@ -14,7 +14,7 @@
     // @ts-ignore
     import Chart from './Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
-    import {DumpRowMeta, KindDumpMeta, Repository} from "@/services/Repository";
+    import {DumpRowMeta, KindDumpMeta, Repository} from '@/services/Repository';
 
     @Component({
         components: {

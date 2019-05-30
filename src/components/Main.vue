@@ -7,6 +7,13 @@
                     :showDiffs="showDiffs"
                     @show-diffs-clicked="onShowDiffsClicked"
                     :isConnected="isConnected"
+                    @clear="clear"
+                    @copy-csv="copyCsv"
+                    @copy-json="copyJson"
+                    @save-csv="saveCsv"
+                    @save-json="saveJson"
+                    @save-state="saveState"
+                    @load-state="loadState"
             />
             <div class="sideContainer dumpContainer">
                 <div class="header">
@@ -79,6 +86,7 @@
     import {ExcludedKinds} from '@/services/ExcludedKinds';
     import CellWithDiff from '@/components/CellWithDiff.vue';
     import Menu from '@/components/Menu.vue';
+    import {PersistState} from '@/services/PersistState';
 
     @Component({
         components: {
@@ -127,6 +135,51 @@
 
         private onPauseClicked() {
             this.isPaused = !this.isPaused;
+        }
+
+        private clear() {
+            this.dumpRepo.clear();
+            this.snapRepo.clear();
+        }
+
+        private saveState() {
+            const persist = new PersistState();
+            persist.persist('snap', this.schema, this.snapRepo);
+        }
+
+        private loadState() {
+            const persist = new PersistState();
+            persist.load('snap', this.snapRepo);
+        }
+
+        private saveJson() {
+            this.download('snapshot.json', this.snapRepo.toJson());
+        }
+
+        private saveCsv() {
+            this.download('snapshot.csv', this.snapRepo.toCsv());
+        }
+
+        private download(filename: string, text: string) {
+            const pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            pom.setAttribute('download', filename);
+
+            if (document.createEvent) {
+                const event = document.createEvent('MouseEvents');
+                event.initEvent('click', true, true);
+                pom.dispatchEvent(event);
+            } else {
+                pom.click();
+            }
+        }
+
+        private copyJson() {
+            navigator.clipboard.writeText(this.snapRepo.toJson());
+        }
+
+        private copyCsv() {
+            navigator.clipboard.writeText(this.snapRepo.toCsv());
         }
 
         private toggleKind(kind: string) {

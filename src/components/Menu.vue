@@ -21,6 +21,13 @@
             </label>
         </div>
 
+        <div class="button clearButton" @click="$emit('clear')">Clear</div>
+        <div class="button" @click="$emit('copy-csv')">Copy Snapshot CSV</div>
+        <div class="button" @click="$emit('copy-json')">Copy Snapshot JSON</div>
+        <div class="button" @click="$emit('save-csv')">Save Snapshot CSV</div>
+        <div class="button" @click="$emit('save-json')">Save Snapshot JSON</div>
+        <div class="button" @click="$emit('save-state')">Save State</div>
+        <div class="button" @click="$emit('load-state')">Load State</div>
     </div>
 </template>
 
@@ -28,7 +35,6 @@
     // @ts-ignore
     import Chart from './Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
-    import {DumpRowMeta, KindDumpMeta, Repository} from "@/services/Repository";
 
     @Component({
         components: {
@@ -50,6 +56,20 @@
         background-color: #2c3e50;
         color: #fafbfc;
         padding: 20px;
+    }
+
+    .button {
+        color: black;
+        background-color: #eff3f6;
+        background-image: linear-gradient(-180deg, #fafbfc, #eff3f6 90%);
+        border-radius: 3px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 6px;
+    }
+
+    .clearButton {
+        color: darkred;
     }
 
     .menu div:not(:first-child) {

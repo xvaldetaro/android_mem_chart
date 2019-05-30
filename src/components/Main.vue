@@ -14,57 +14,27 @@
                 @save-state="saveState"
                 @load-state="loadState"
         />
-        <Panel header="'Dump Data'">
-            <div class="chartContainer">
-                <Chart :chart-data="dumpChartData" :on-label-click="toggleKind"></Chart>
-            </div>
-            <div class="tableContainer">
-                <table>
-                    <thead>
-                    <tr class='linesTable'>
-                        <th>#</th>
-                        <th v-for="name in labels">{{ name }}</th>
-                        <th class="lineButton"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="meta in dumpRows">
-                        <td>{{ meta.step }}</td>
-                        <td v-for="kind in kinds">
-                            <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs"/>
-                        </td>
-                        <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </Panel>
 
-        <Panel header="'Snapshots'">
-            <div class="chartContainer">
-                <Chart :chart-data="snapChartData" :on-label-click="toggleKind"></Chart>
-            </div>
-            <div class="tableContainer">
-                <table>
-                    <thead>
-                    <tr class='snapshotTable'>
-                        <th></th>
-                        <th>#</th>
-                        <th v-for="name in labels">{{ name }}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="meta in snapRows">
-                        <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
-                        <td>{{ meta.step }}</td>
-                        <td v-for="kind in kinds">
-                            <CellWithDiff :meta="meta.kinds[kind]" :showDiff="showDiffs"/>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </Panel>
+        <RealtimePanel
+                :chart-data="dumpChartData"
+                :rows-meta="dumpRows"
+                :kinds="kinds"
+                :start-with-button="false"
+                :toggle-kind="toggleKind"
+                :show-diffs="showDiffs"
+        >
+            <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
+        </RealtimePanel>
+        <RealtimePanel
+                :chart-data="snapChartData"
+                :rows-meta="snapRows"
+                :kinds="kinds"
+                :start-with-button="true"
+                :toggle-kind="toggleKind"
+                :show-diffs="showDiffs"
+        >
+            <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
+        </RealtimePanel>
     </div>
 </template>
 
@@ -80,9 +50,11 @@
     import Menu from '@/components/Menu.vue';
     import {PersistState} from '@/services/PersistState';
     import Panel from '@/components/Panel.vue';
+    import RealtimePanel from '@/components/RealtimePanel.vue';
 
     @Component({
         components: {
+            RealtimePanel,
             Panel,
             Menu,
             CellWithDiff,

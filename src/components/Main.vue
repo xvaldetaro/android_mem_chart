@@ -22,8 +22,9 @@
                 :start-with-button="false"
                 :toggle-kind="toggleKind"
                 :show-diffs="showDiffs"
+                :onButtonAction="saveRowSnapshot"
         >
-            <td class='button lineButton' v-on:click="saveRowSnapshot(meta)">&#9745</td>
+            <span class="lineButton">&#9745</span>
         </RealtimePanel>
         <RealtimePanel
                 :chart-data="snapChartData"
@@ -32,8 +33,9 @@
                 :start-with-button="true"
                 :toggle-kind="toggleKind"
                 :show-diffs="showDiffs"
+                :onButtonAction="deleteRowSnapshot"
         >
-            <td class='button snapshotButton' v-on:click="deleteRowSnapshot(meta)">&#9746</td>
+            <span class="snapshotButton">&#9746</span>
         </RealtimePanel>
     </div>
 </template>
@@ -210,52 +212,12 @@
         margin-right: 20px;
     }
 
-    .tableContainer {
-        flex-grow: 1;
-        overflow-y: scroll;
-    }
-
-    .button {
-        background-color: #eff3f6;
-        background-image: linear-gradient(-180deg, #fafbfc, #eff3f6 90%);
-        font-weight: bold;
-        cursor: pointer;
-    }
-
     .snapshotButton {
         color: #ec0d0d;
     }
 
     .lineButton {
         color: #3cbd01;
-    }
-
-    table {
-        border-collapse: collapse;
-        overflow-y: scroll;
-        overflow-x: hidden;
-        width: 100%;
-    }
-
-    th {
-        background-color: #2c3e50;
-        color: ghostwhite;
-        font-size: 13px;
-        padding: 8px 4px 8px 4px;
-    }
-
-    tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-
-    td {
-        font-size: 14px;
-        padding: 6px 2px 6px 2px;
-        border-right: 1px solid #d2d2d2;
-    }
-
-    td:last-child {
-        border-right: 0;
     }
 
 </style>

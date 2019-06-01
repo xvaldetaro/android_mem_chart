@@ -1,5 +1,12 @@
 #!/usr/bin/env node
 
-var server = require('../local/server.js');
+const semver = require('semver');
+
+if (!semver.satisfies(process.version, '>=8')) {
+    console.log('Node version must be >=8.x. current version:', process.version);
+    process.exit(1);
+} else {
+    var server = require('../local/server.js');
+}
 
 

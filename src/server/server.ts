@@ -1,7 +1,6 @@
 import bootstrap, {Options} from './loop';
 
 import comm from 'commander';
-
 let processName;
 comm
     .version('0.1.0')

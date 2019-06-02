@@ -1,4 +1,4 @@
-import {DumpRow, Payload} from '@/shared/SharedTypes';
+import {DumpRow, Payload} from '@/server/SharedTypes';
 
 export class ServerStream {
     public isConnected: boolean = false;

@@ -8,7 +8,7 @@
     import {Component, Vue} from 'vue-property-decorator';
     import Main from '@/components/Main.vue';
     import {ServerStream} from '@/services/ServerStream';
-    import {DumpRow, Payload} from '@/shared/SharedTypes';
+    import {DumpRow, Payload} from '@/server/SharedTypes';
     import {Base64} from 'js-base64';
 
     @Component({

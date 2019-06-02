@@ -1,5 +1,5 @@
 import R from 'ramda';
-import {DumpRow} from '@/shared/SharedTypes';
+import {DumpRow} from './SharedTypes';
 import {RawKind, SummaryKind} from './memkinds';
 
 export const SummaryMatchers = {

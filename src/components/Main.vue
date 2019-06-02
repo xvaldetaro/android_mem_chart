@@ -45,7 +45,7 @@
     import Chart from './Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {DumpRowMeta, Repository} from '@/services/Repository';
-    import {DumpRow, Payload} from '@/shared/SharedTypes';
+    import {DumpRow, Payload} from '@/server/SharedTypes';
     import {ServerStream} from '@/services/ServerStream';
     import {ExcludedKinds} from '@/services/ExcludedKinds';
     import CellWithDiff from '@/components/CellWithDiff.vue';

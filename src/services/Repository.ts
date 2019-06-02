@@ -1,4 +1,4 @@
-import {DumpRow} from '@/shared/SharedTypes';
+import {DumpRow} from '@/server/SharedTypes';
 import {ChartData, kindToColor} from '@/services/ChartConstants';
 import {ExcludedKinds} from '@/services/ExcludedKinds';
 

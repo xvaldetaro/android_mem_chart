@@ -1,6 +1,17 @@
-import R from 'ramda';
-import {DumpRow} from '@/shared/SharedTypes';
+import {DumpRow} from './SharedTypes';
 import {RawKind, SummaryKind} from './memkinds';
+
+export const SummaryKinds = [
+    SummaryKind.JavaHeap,
+    SummaryKind.NativeHeap,
+    SummaryKind.Code,
+    SummaryKind.Stack,
+    SummaryKind.Graphics,
+    SummaryKind.PrivateOther,
+    SummaryKind.System,
+    SummaryKind.Total,
+    SummaryKind.TotalSwapPss,
+];
 
 export const SummaryMatchers = {
     [SummaryKind.JavaHeap]: /Java\s+Heap:\s+(\d+)/,
@@ -22,19 +33,38 @@ export function parseSummary(data: string): DumpRow | null {
     const cut = data.substring(index)
     const endIndex = cut.search(/Objects/)
     const relevantPiece = cut.substring(0, endIndex)
+    return parseByType(relevantPiece, SummaryKinds, SummaryMatchers);
+}
 
-    try {
-        return R.mapObjIndexed((matcher: RegExp) => {
-            const matched = relevantPiece.match(matcher);
-            if (matched && matched.length > 0) {
-                return parseInt(matched[1], 10);
-            }
-            return 0;
-        }, SummaryMatchers)
-    } catch (e) {
+export function parseRaw(data: string): DumpRow | null {
+    const index = data.search(/------/)
+    if (index === -1) {
         return null
     }
+    const cut = data.substring(index)
+    const endIndex = cut.search(/App Summary/)
+    const relevantPiece = cut.substring(0, endIndex)
+    return parseByType(relevantPiece, RawKinds, RawMatchers);
 }
+
+export const RawKinds = [
+    RawKind.NativeHeap,
+    RawKind.DalvikHeap,
+    RawKind.DalvikOther,
+    RawKind.Stack,
+    RawKind.Ashmem,
+    RawKind.GfxDev,
+    RawKind.OtherDev,
+    RawKind.soMmap,
+    RawKind.apkMmap,
+    RawKind.ttfMmap,
+    RawKind.dexMmap,
+    RawKind.oatMmap,
+    RawKind.artMmap,
+    RawKind.OtherMmap,
+    RawKind.Unknown,
+    RawKind.TotalRaw,
+];
 
 export const RawMatchers = {
     [RawKind.NativeHeap]: /Native Heap\s+(\d+)/,
@@ -55,23 +85,18 @@ export const RawMatchers = {
     [RawKind.TotalRaw]: /TOTAL\s+(\d+)/,
 };
 
-export function parseRaw(data: string): DumpRow | null {
-    const index = data.search(/------/)
-    if (index === -1) {
-        return null
-    }
-    const cut = data.substring(index)
-    const endIndex = cut.search(/App Summary/)
-    const relevantPiece = cut.substring(0, endIndex)
+function parseByType(data: string, kinds: string[], matchers: {[key: string]: RegExp}): DumpRow | null {
     try {
-        return R.mapObjIndexed((matcher: RegExp) => {
-            const matched = relevantPiece.match(matcher);
+        return kinds.map((kind) => {
+            const matcher = matchers[kind];
+            const matched = data.match(matcher);
             if (matched && matched.length > 0) {
                 return parseInt(matched[1], 10);
             }
             return 0;
-        }, RawMatchers)
+        })
     } catch (e) {
         return null
     }
 }
+

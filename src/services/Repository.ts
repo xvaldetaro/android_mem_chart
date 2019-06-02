@@ -1,57 +1,86 @@
-import {DumpRow} from '@/shared/SharedTypes';
+import {DumpRow, Schema, TaggedRow} from '@/server/SharedTypes';
 import {ChartData, kindToColor} from '@/services/ChartConstants';
 import {ExcludedKinds} from '@/services/ExcludedKinds';
 
-export interface DumpByKind {
-    [key: string]: number[];
-}
+export type DumpByKind = number[][]
 
 export interface KindDumpMeta {
     diffPercent: number;
     value: number;
 }
 
-export interface DumpRowMeta { kinds: {[key: string]: KindDumpMeta}, step: string}
+export interface DumpRowMeta {
+    row: KindDumpMeta[];
+    tag: string
+}
 
 export class Repository {
     public rowsMeta: DumpRowMeta[] = [];
-    private dumpByKind: DumpByKind = {};
+    private dumpByKind: DumpByKind = [];
     private step: number = 0;
     private excludeKinds: ExcludedKinds;
     private schema: string[];
 
-    constructor(excludedKinds: ExcludedKinds, schema: string[]) {
+    constructor(excludedKinds: ExcludedKinds, schema: Schema) {
         this.schema = schema;
+        this.dumpByKind = schema.map(() => []);
         this.excludeKinds = excludedKinds;
-        schema.map((kind) => this.dumpByKind[kind] = []);
-        this.dumpByKind.step = [];
     }
 
     public toChartData(count: number): ChartData {
-        const labels: string[] = this.sliceRows(count).map((meta) => meta.step);
+        const labels: string[] = this.sliceRows(count).map((meta) => meta.tag);
         for (let index = labels.length; index < count; index++) {
             labels[index] = '_'
         }
 
         const datasets = this.schema
-            .map((kind) => {
-                const data = this.dumpByKind[kind].slice(-1 * count);
-                const backgroundColor = kindToColor(kind);
-                return {data, backgroundColor, kind, hidden: this.excludeKinds.isExcluded(kind)};
+            .map((name, index) => {
+                const data = this.dumpByKind[index].slice(-1 * count);
+                const backgroundColor = kindToColor(name);
+                return {data, backgroundColor, name, index, hidden: this.excludeKinds.isExcluded(index)};
             });
 
         return {labels, datasets};
+    }
+
+    public toCsv(): string {
+        const header = 'tag,' + this.schema.join(',') + '\n';
+        const inverted = this.rowsMeta.slice();
+        inverted.reverse();
+        const body = inverted.map((meta) => {
+            const values = this.schema.map((kind, index) => meta.row[index].value);
+            return meta.tag + ',' + values.join(',');
+        }).join('\n');
+        return header + body;
+    }
+
+    public toJson(): string {
+        return '';
+        // const inverted = this.rowsMeta.slice();
+        // inverted.reverse();
+        // return JSON.stringify(inverted.map((meta) => {
+        //     const raw: DumpRow = {};
+        //     this.schema.map((kind) => {
+        //         raw[kind] = meta.kinds[kind].value;
+        //     });
+        //     return raw;
+        // }))
+    }
+
+    public clear() {
+        this.rowsMeta = [];
+        this.dumpByKind = this.schema.map(() => []);
     }
 
     public sliceRows(count: number): DumpRowMeta[] {
         return this.rowsMeta.slice(-1 * count);
     }
 
-    public deleteRow(step: string) {
-        const index = this.rowsMeta.findIndex((e) => e.step === step)
+    public deleteRow(tag: string) {
+        const index = this.rowsMeta.findIndex((e) => e.tag === tag)
         if (index !== -1) {
             this.rowsMeta.splice(index, 1)
-            Object.keys(this.dumpByKind).forEach((key) => this.dumpByKind[key].splice(index, 1));
+            this.dumpByKind.forEach((col) => col.splice(index, 1));
         }
     }
 
@@ -60,52 +89,45 @@ export class Repository {
             this.rowsMeta = this.rowsMeta.slice(-10000);
         }
 
-        let step = meta.step;
+        let step = meta.tag;
         this.step += 1;
         if (!step) {
             step = this.step.toString();
         }
-        this.schema.forEach((kind) => {
-            this.dumpByKind[kind].push(meta.kinds[kind].value)
-        });
-        return this.rowsMeta.push({ kinds: Object.assign({}, meta.kinds), step});
-    }
-
-    public pushRow(row: DumpRow, step?: string) {
-        if (this.rowsMeta.length > 50000) {
-            this.rowsMeta = this.rowsMeta.slice(-10000);
-        }
-
-        this.step += 1;
-        if (!step) {
-            step = this.step.toString();
-        }
-        this.schema.forEach((kind) => {
-            this.dumpByKind[kind].push(row[kind])
-        });
+        this.dumpByKind.forEach((col, index) => col.push(meta.row[index].value));
+        const row: DumpRow = meta.row.map(({value}) => value);
         const previous = this.rowsMeta.length !== 0 && this.rowsMeta[this.rowsMeta.length - 1] || null;
         this.rowsMeta.push(this.getMeta(row, previous, step))
     }
 
-    private getMeta(row: DumpRow, previous: DumpRowMeta | null, step: string): DumpRowMeta {
-        const meta: DumpRowMeta = { kinds: {}, step};
+    public pushRow({row, tag}: TaggedRow) {
+        if (this.rowsMeta.length > 50000) {
+            this.rowsMeta = this.rowsMeta.slice(-10000);
+        }
+
+        row.forEach((value, index) => this.dumpByKind[index].push(value));
+        const previous = this.rowsMeta.length !== 0 && this.rowsMeta[this.rowsMeta.length - 1] || null;
+        this.rowsMeta.push(this.getMeta(row, previous, tag))
+    }
+
+    private getMeta(row: DumpRow, previous: DumpRowMeta | null, tag: string): DumpRowMeta {
+        const meta: DumpRowMeta = {row: [], tag};
         if (!previous) {
-            this.schema.forEach((kind) => {
-                meta.kinds[kind] = { diffPercent: 0, value: row[kind] }
-            });
+            meta.row = row.map((value) => ({diffPercent: 0, value}));
         } else {
-            this.schema.forEach((kind) => {
-                let diff = 100
-                if (previous.kinds[kind].value === 0) {
-                    if (row[kind] > 0) {
+            meta.row = row.map((value, index) => {
+                const previousValue = previous.row[index].value;
+                let diff = 100;
+                if (previousValue === 0) {
+                    if (value > 0) {
                         diff = 100;
                     } else {
                         diff = 0;
                     }
                 } else {
-                    diff = (row[kind] - previous.kinds[kind].value) / previous.kinds[kind].value;
+                    diff = (value - previousValue) / previousValue;
                 }
-                meta.kinds[kind] = {diffPercent: diff, value: row[kind]}
+                return {diffPercent: diff, value};
             });
         }
         return meta

@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+
+const semver = require('semver');
+const comm = require('commander');
+
+if (!semver.satisfies(process.version, '>=8')) {
+    console.log('Node version must be >=8.x. current version:', process.version);
+    process.exit(1);
+} else {
+    comm
+        .version('0.1.0')
+        .description('Process meminfo dumps of an android process.\nex: androidmc serve com.company.build.flavor\n' +
+            'Find all process names by calling \'adb shell dumpsys meminfo\'')
+        .command('serve', 'starts a server on port. take regular snapshots and send to client.')
+        .command('snap', 'snap the dump with current tag to file')
+        .command('record', 'Record ongoing usage to file')
+        .parse(process.argv);
+}
+

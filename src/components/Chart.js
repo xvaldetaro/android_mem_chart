@@ -26,17 +26,17 @@ export default {
                         }
                         const out = chart.data.datasets.map((ds) => {
                             return {
-                                text: ds.kind,
+                                text: ds.name,
                                 fillStyle: ds.backgroundColor,
                                 hidden: ds.hidden,
-                                kind: ds.kind,
+                                index: ds.index,
                             };
                         });
                         return out;
                     },
                 },
                 onClick: (e, legendItem) => {
-                    this.onLabelClick(legendItem.kind);
+                    this.onLabelClick(legendItem.index);
                 },
             },
             scales: {

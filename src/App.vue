@@ -1,6 +1,6 @@
 <template>
     <div id="app">
-        <Main v-if="schema" :server="server" :schema="schema" :file-dump="fileDump" />
+        <Main v-if="schema" :server="server" :schema="schema" :file-dump="fileDump"/>
     </div>
 </template>
 
@@ -8,7 +8,7 @@
     import {Component, Vue} from 'vue-property-decorator';
     import Main from '@/components/Main.vue';
     import {ServerStream} from '@/services/ServerStream';
-    import {DumpRow, Payload} from '@/shared/SharedTypes';
+    import {DumpDocument, TaggedRow} from '@/server/SharedTypes';
     import {Base64} from 'js-base64';
 
     @Component({
@@ -19,17 +19,18 @@
     export default class App extends Vue {
         private schema: string[] | null = null;
         private server = new ServerStream();
-        private fileDump: DumpRow[] | null = null;
+        private fileDump: TaggedRow[] | null = null;
 
         protected created() {
             const splitUrl = window.location.href.split('?dump=');
             if (splitUrl.length > 1) {
                 const json = Base64.decode(splitUrl[1]);
-                this.fileDump = JSON.parse(json) as DumpRow[];
+                this.fileDump = JSON.parse(json) as TaggedRow[];
                 this.schema = Object.keys(this.fileDump[0])
             } else {
-                this.server.connect((schema: string[]) => {
-                    this.schema = schema;
+                this.server.connect((doc: DumpDocument) => {
+                    this.schema = doc.schema;
+                    this.fileDump = doc.rows;
                 });
             }
         }

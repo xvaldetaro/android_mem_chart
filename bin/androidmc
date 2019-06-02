@@ -1,5 +1,0 @@
-#!/usr/bin/env node
-
-var server = require('../local/server.js');
-
-

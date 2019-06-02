@@ -41,7 +41,9 @@
     "vue-chartjs": "^3.4.2",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.1.0",
+    "vue-router": "^3.0.6",
     "vue-template-compiler": "^2.5.21",
+    "vuex": "^3.1.1",
     "websocket": "^1.0.28"
   },
   "postcss": {

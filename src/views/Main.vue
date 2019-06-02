@@ -46,14 +46,13 @@
 
 <script lang="ts">
     // @ts-ignore
-    import Chart from './Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {DumpRowMeta, Repository} from '@/services/Repository';
     import {TaggedRow} from '@/server/SharedTypes';
     import {ServerStream} from '@/services/ServerStream';
     import {ExcludedKinds} from '@/services/ExcludedKinds';
     import CellWithDiff from '@/components/CellWithDiff.vue';
-    import Menu from '@/components/Menu.vue';
+    import Menu from '@/views/Menu.vue';
     import {PersistState} from '@/services/PersistState';
     import Panel from '@/components/Panel.vue';
     import ChartWithTablePanel from '@/components/ChartWithTablePanel.vue';
@@ -64,7 +63,6 @@
             Panel,
             Menu,
             CellWithDiff,
-            Chart,
         },
     })
     export default class Main extends Vue {

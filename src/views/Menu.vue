@@ -33,7 +33,7 @@
 
 <script lang="ts">
     // @ts-ignore
-    import Chart from './Chart.js';
+    import Chart from '@/components/Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
 
     @Component({

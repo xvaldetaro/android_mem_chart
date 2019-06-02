@@ -1,12 +1,16 @@
 <template>
     <div id="app">
-        <Main v-if="schema" :server="server" :schema="schema" :file-dump="fileDump"/>
+        <div id="nav">
+            <router-link to="/">Main</router-link> |
+            <router-link to="/about">About</router-link>
+        </div>
+        <router-view/>
     </div>
 </template>
 
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
-    import Main from '@/components/Main.vue';
+    import Main from '@/views/Main.vue';
     import {ServerStream} from '@/services/ServerStream';
     import {DumpDocument, TaggedRow} from '@/server/SharedTypes';
     import {Base64} from 'js-base64';
@@ -28,10 +32,6 @@
                 this.fileDump = JSON.parse(json) as TaggedRow[];
                 this.schema = Object.keys(this.fileDump[0])
             } else {
-                this.server.connect((doc: DumpDocument) => {
-                    this.schema = doc.schema;
-                    this.fileDump = doc.rows;
-                });
             }
         }
     }

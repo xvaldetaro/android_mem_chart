@@ -1,6 +1,7 @@
 import {DumpRow, Schema, TaggedRow} from '@/server/SharedTypes';
-import {ChartData, kindToColor} from '@/services/ChartConstants';
+import {ChartData} from '@/services/ChartConstants';
 import {ExcludedKinds} from '@/services/ExcludedKinds';
+import {ChartColors} from '@/services/ChartColors';
 
 export type DumpByKind = number[][]
 
@@ -20,6 +21,7 @@ export class Repository {
     private step: number = 0;
     private excludeKinds: ExcludedKinds;
     private schema: string[];
+    private chartColors = new ChartColors();
 
     constructor(excludedKinds: ExcludedKinds, schema: Schema) {
         this.schema = schema;
@@ -36,7 +38,7 @@ export class Repository {
         const datasets = this.schema
             .map((name, index) => {
                 const data = this.dumpByKind[index].slice(-1 * count);
-                const backgroundColor = kindToColor(name);
+                const backgroundColor = this.chartColors.kindToColor(name, index);
                 return {data, backgroundColor, name, index, hidden: this.excludeKinds.isExcluded(index)};
             });
 

@@ -7,7 +7,7 @@ program
     .option('-l, --launch-browser', 'Launch browser automatically')
     .option('-r, --raw', 'Use raw values (not Summary) from meminfo')
     .option('-d, --dev', 'starts a dev websocket server only for dev')
-    .option('-f, --from-file', 'Loads from file instead of Realtime pulling')
+    .option('-f, --from-file <file>', 'Loads from file instead of Realtime pulling')
     .option('-i, --interval', 'Interval between dumps in seconds')
     .parse(process.argv);
 

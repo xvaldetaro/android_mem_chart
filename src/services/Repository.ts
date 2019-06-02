@@ -45,26 +45,18 @@ export class Repository {
 
     public toCsv(): string {
         const header = 'tag,' + this.schema.join(',') + '\n';
-        const inverted = this.rowsMeta.slice();
-        inverted.reverse();
-        const body = inverted.map((meta) => {
-            const values = this.schema.map((kind, index) => meta.row[index].value);
-            return meta.tag + ',' + values.join(',');
+        const body = this.rowsMeta.map(({tag, row}) => {
+            return tag + ',' + row.map(({value}) => value).join(',');
         }).join('\n');
         return header + body;
     }
 
     public toJson(): string {
-        return '';
-        // const inverted = this.rowsMeta.slice();
-        // inverted.reverse();
-        // return JSON.stringify(inverted.map((meta) => {
-        //     const raw: DumpRow = {};
-        //     this.schema.map((kind) => {
-        //         raw[kind] = meta.kinds[kind].value;
-        //     });
-        //     return raw;
-        // }))
+        const rows: TaggedRow[] = this.rowsMeta.map((meta: DumpRowMeta) => {
+            const pureValueRow = meta.row.map((withDiff) => withDiff.value);
+            return {row: pureValueRow, tag: meta.tag};
+        });
+        return JSON.stringify({schema: this.schema, rows});
     }
 
     public clear() {

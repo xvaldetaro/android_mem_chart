@@ -16,6 +16,7 @@
         />
 
         <RealtimePanel
+                :title="'Realtime Data'"
                 :chart-data="dumpChartData"
                 :rows-meta="dumpRows"
                 :included-kind-indices="includedKindIndices"
@@ -28,6 +29,7 @@
             <span class="lineButton">&#9745</span>
         </RealtimePanel>
         <RealtimePanel
+                :title="'Snapshots'"
                 :chart-data="snapChartData"
                 :rows-meta="snapRows"
                 :included-kind-indices="includedKindIndices"
@@ -54,11 +56,11 @@
     import Menu from '@/components/Menu.vue';
     import {PersistState} from '@/services/PersistState';
     import Panel from '@/components/Panel.vue';
-    import RealtimePanel from '@/components/RealtimePanel.vue';
+    import ChartWithTablePanel from '@/components/ChartWithTablePanel.vue';
 
     @Component({
         components: {
-            RealtimePanel,
+            RealtimePanel: ChartWithTablePanel,
             Panel,
             Menu,
             CellWithDiff,
@@ -86,8 +88,8 @@
             this.saveKinds();
             if (this.fileDump) {
                 this.fileDump.forEach((row) => {
-                    this.dumpRepo.pushRow(row);
-                    this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
+                    this.snapRepo.pushRow(row);
+                    this.snapChartData = this.snapRepo.toChartData(this.stepCount);
                 });
             }
 

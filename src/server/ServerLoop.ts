@@ -1,15 +1,14 @@
 import * as http from 'http';
 import {Server} from 'http';
 import {server} from 'websocket';
-import {DumpRow, Payload, Schema} from './SharedTypes';
+import {DumpDocument, DumpRow, Payload, Schema} from './SharedTypes';
 // @ts-ignore
 import opn from 'opn';
-import {RawKind, SummaryKind} from './memkinds';
 import * as path from 'path';
 // @ts-ignore
 import serveStatic from 'serve-static';
 import finalhandler from 'finalhandler';
-import {getParamFromFile} from './FileDump';
+import {LoadFile} from './FileDump';
 import {Observable} from 'rxjs';
 import {RawKinds, SummaryKinds} from './parse';
 
@@ -52,19 +51,9 @@ export class ServerLoop {
         httpServer.listen(wsport, () => {
             if (this.openBrowser) {
                 const address = this.isDev && 'http://localhost:8080' || 'http://localhost:3000';
-                if (this.fromFile) {
-                    getParamFromFile(this.fromFile).then((baseString: string) => {
-                        opn(address + '?dump=' + baseString)
-                    })
-                } else {
-                    opn(address);
-                }
+                opn(address);
             }
         });
-
-        if (this.fromFile) {
-            return;
-        }
 
         console.log('waiting for connection');
 
@@ -73,7 +62,10 @@ export class ServerLoop {
             console.log('Connected');
             const conn = request.accept(undefined, request.origin)
             const schema: Schema = this.isRaw ? RawKinds : SummaryKinds;
-            const doc = {schema, rows: []};
+            let doc: DumpDocument = {schema, rows: []};
+            if (this.fromFile) {
+                doc = LoadFile.getDocFromFile(this.fromFile)
+            }
             conn.sendUTF(JSON.stringify(doc));
 
             const disposable = this.shellObservable.subscribe((parsed) => {

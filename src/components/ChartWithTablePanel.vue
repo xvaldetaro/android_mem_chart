@@ -1,5 +1,5 @@
 <template>
-    <Panel header="'Dump Data'">
+    <Panel :header="title">
         <div class="chartContainer">
             <Chart :chart-data="chartData" :on-label-click="toggleKind"></Chart>
         </div>
@@ -54,7 +54,8 @@
             Chart,
         },
     })
-    export default class RealtimePanel extends Vue {
+    export default class ChartWithTablePanel extends Vue {
+        @Prop() private title!: string;
         @Prop() private chartData!: ChartData;
         @Prop() private rowsMeta!: DumpRowMeta[];
         @Prop() private includedKindIndices!: number[];

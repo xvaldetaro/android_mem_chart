@@ -17,17 +17,14 @@ const PredefinedColors = [
     '#fffac8',
 ];
 
-export class ChartColors {
-
-    public kindToColor(kind: string, index: number): string {
-        if (index >= PredefinedColors.length) {
-            const color = intToRGB(hashCode(kind))
-            return '#' + color
-        } else {
-            return PredefinedColors[index];
-        }
-    };
-}
+export function kindToColor(kind: string, index: number): string {
+    if (index >= PredefinedColors.length) {
+        const color = intToRGB(hashCode(kind))
+        return '#' + color
+    } else {
+        return PredefinedColors[index];
+    }
+};
 
 function hashCode(str: string): number { // java String#hashCode
     let hash = 0;

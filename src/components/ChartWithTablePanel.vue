@@ -14,21 +14,21 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="meta in rowsMeta">
+                <tr v-for="(row, rowIndex) in rows">
                     <td v-if="startWithButton"
-                        v-bind:meta="meta"
                         class="buttonCell"
-                        v-on:click="onButtonAction(meta)">
+                        v-on:click="onButtonAction({tag: repo.tags[rowIndex], row})">
                         <slot></slot>
                     </td>
-                    <td>{{ meta.tag }}</td>
-                    <td v-for="index in includedKindIndices">
-                        <CellWithDiff :meta="meta.row[index]" :showDiff="showDiffs"></CellWithDiff>
+                    <td>{{ repo.tags[rowIndex] }}</td>
+                    <td v-for="kindIndex in includedKindIndices">
+                        <CellWithDiff :value="row[kindIndex]"
+                                      :diff="repo.diffs[rowIndex][kindIndex]"
+                                      :showDiff="config.showDiffs" />
                     </td>
                     <td v-if="!startWithButton"
-                        v-bind:meta="meta"
                         class="buttonCell"
-                        v-on:click="onButtonAction(meta)">
+                        v-on:click="onButtonAction({tag: repo.tags[rowIndex], row})">
                         <slot></slot>
                     </td>
                 </tr>
@@ -41,11 +41,14 @@
 <script lang="ts">
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {ChartData} from '@/services/ChartConstants';
-    import {DumpRowMeta} from '@/services/Repository';
     import CellWithDiff from '@/components/CellWithDiff.vue';
     import Panel from '@/components/Panel.vue';
     // @ts-ignore
     import Chart from './Chart.js';
+    import {mapGetters, mapState} from 'vuex';
+    import {Repo} from '@/store';
+    import {Schema, TaggedRow} from '@/server/SharedTypes';
+    import {toChartData} from '@/services/Repository';
 
     @Component({
         components: {
@@ -53,17 +56,27 @@
             CellWithDiff,
             Chart,
         },
+        computed: {
+            ...mapState(['config', 'schema', 'excludedIndices']),
+            ...mapGetters(['includedKindIndices']),
+        },
     })
     export default class ChartWithTablePanel extends Vue {
         @Prop() private title!: string;
-        @Prop() private chartData!: ChartData;
-        @Prop() private rowsMeta!: DumpRowMeta[];
-        @Prop() private includedKindIndices!: number[];
+        @Prop() private repo!: Repo;
         @Prop() private startWithButton!: boolean;
         @Prop() private toggleKind!: (kind: string) => void;
-        @Prop() private onButtonAction!: (meta: DumpRowMeta) => void;
-        @Prop() private showDiffs!: boolean;
-        @Prop() private schema!: string[];
+        @Prop() private onButtonAction!: (taggedRow: TaggedRow) => void;
+        private schema!: Schema;
+        private excludedIndices!: boolean[];
+
+        get chartData(): ChartData {
+            return toChartData(20, this.repo, this.schema, this.excludedIndices);
+        }
+
+        get rows(): number[][] {
+            return this.repo.rows;
+        }
     };
 
 </script>

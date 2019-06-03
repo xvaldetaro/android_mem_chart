@@ -21,19 +21,6 @@
         },
     })
     export default class App extends Vue {
-        private schema: string[] | null = null;
-        private server = new ServerStream();
-        private fileDump: TaggedRow[] | null = null;
-
-        protected created() {
-            const splitUrl = window.location.href.split('?dump=');
-            if (splitUrl.length > 1) {
-                const json = Base64.decode(splitUrl[1]);
-                this.fileDump = JSON.parse(json) as TaggedRow[];
-                this.schema = Object.keys(this.fileDump[0])
-            } else {
-            }
-        }
     }
 </script>
 

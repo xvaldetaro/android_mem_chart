@@ -1,133 +1,70 @@
 <template>
-    <div class="mainContainer">
-        <Menu
-                :isPaused="isPaused"
-                @pause-clicked="onPauseClicked"
-                :showDiffs="showDiffs"
-                @show-diffs-clicked="onShowDiffsClicked"
-                :isConnected="isConnected"
-                @clear="clear"
-                @copy-csv="copyCsv"
-                @copy-json="copyJson"
-                @save-csv="saveCsv"
-                @save-json="saveJson"
-                @save-state="saveState"
-                @load-state="loadState"
-        />
+    <div class="mainContainer" v-if="schema">
+        <Menu />
 
-        <RealtimePanel
+        <ChartWithTablePanel
                 :title="'Realtime Data'"
                 :chart-data="dumpChartData"
-                :rows-meta="dumpRows"
-                :included-kind-indices="includedKindIndices"
-                :schema="schema"
+                :repo="dumpRepo"
                 :start-with-button="false"
                 :toggle-kind="toggleKind"
-                :show-diffs="showDiffs"
                 :onButtonAction="saveRowSnapshot"
         >
             <span class="lineButton">&#9745</span>
-        </RealtimePanel>
-        <RealtimePanel
+        </ChartWithTablePanel>
+        <ChartWithTablePanel
                 :title="'Snapshots'"
                 :chart-data="snapChartData"
-                :rows-meta="snapRows"
-                :included-kind-indices="includedKindIndices"
-                :schema="schema"
+                :repo="snapRepo"
                 :start-with-button="true"
                 :toggle-kind="toggleKind"
-                :show-diffs="showDiffs"
                 :onButtonAction="deleteRowSnapshot"
         >
             <span class="snapshotButton">&#9746</span>
-        </RealtimePanel>
+        </ChartWithTablePanel>
     </div>
 </template>
 
 <script lang="ts">
     // @ts-ignore
-    import {Component, Prop, Vue} from 'vue-property-decorator';
-    import {DumpRowMeta, Repository} from '@/services/Repository';
-    import {TaggedRow} from '@/server/SharedTypes';
+    import {Component, Vue} from 'vue-property-decorator';
+    import {DumpDocument, Schema, TaggedRow} from '@/server/SharedTypes';
     import {ServerStream} from '@/services/ServerStream';
-    import {ExcludedKinds} from '@/services/ExcludedKinds';
     import CellWithDiff from '@/components/CellWithDiff.vue';
     import Menu from '@/views/Menu.vue';
-    import {PersistState} from '@/services/PersistState';
     import Panel from '@/components/Panel.vue';
     import ChartWithTablePanel from '@/components/ChartWithTablePanel.vue';
+    import {mapGetters, mapState} from 'vuex';
 
     @Component({
         components: {
-            RealtimePanel: ChartWithTablePanel,
+            ChartWithTablePanel,
             Panel,
             Menu,
             CellWithDiff,
         },
+        computed: {
+            ...mapState(['dumpRepo', 'snapRepo']),
+            ...mapGetters(['dumpChartData', 'snapChartData']),
+        }
     })
     export default class Main extends Vue {
 
-        @Prop() private server!: ServerStream;
-        @Prop() private schema!: string[];
-        @Prop() private fileDump!: TaggedRow[] | null;
-
-        private stepCount = 20;
-        private isPaused = false;
-        private showDiffs = true;
-        private excludedKinds = new ExcludedKinds(this.schema);
-        private includedKindIndices: number[] = [];
-        private dumpRepo = new Repository(this.excludedKinds, this.schema);
-        private snapRepo = new Repository(this.excludedKinds, this.schema);
-        private dumpChartData = this.dumpRepo.toChartData(this.stepCount);
-        private snapChartData = this.snapRepo.toChartData(this.stepCount);
+        private server = new ServerStream();
 
         protected created() {
-            this.excludedKinds.load();
-            this.saveKinds();
-            if (this.fileDump) {
-                this.fileDump.forEach((row) => {
-                    this.snapRepo.pushRow(row);
-                    this.snapChartData = this.snapRepo.toChartData(this.stepCount);
+            this.server.connect((doc: DumpDocument) => {
+                this.$store.dispatch('bootstrap', {schema: doc.schema, loadedSnaps: doc.rows});
+                this.server.setDumpListener((row: TaggedRow) => {
+                    if (!this.$store.state.config.isPaused) {
+                        this.$store.dispatch('pushDumpRow', row);
+                    }
                 });
-            }
-
-            this.server.setDumpListener((row: TaggedRow) => {
-                if (!this.isPaused) {
-                    this.dumpRepo.pushRow(row);
-                    this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
-                }
             });
         }
 
-        private onShowDiffsClicked() {
-            this.showDiffs = !this.showDiffs;
-        }
-
-        private onPauseClicked() {
-            this.isPaused = !this.isPaused;
-        }
-
-        private clear() {
-            this.dumpRepo.clear();
-            this.snapRepo.clear();
-        }
-
-        private saveState() {
-            const persist = new PersistState();
-            persist.persist('snap', this.schema, this.snapRepo);
-        }
-
-        private loadState() {
-            const persist = new PersistState();
-            persist.load('snap', this.snapRepo);
-        }
-
-        private saveJson() {
-            this.download('snapshot.json', this.snapRepo.toJson());
-        }
-
-        private saveCsv() {
-            this.download('snapshot.csv', this.snapRepo.toCsv());
+        private get schema(): Schema {
+            return this.$store.state.schema;
         }
 
         private download(filename: string, text: string) {
@@ -144,54 +81,16 @@
             }
         }
 
-        private copyJson() {
-            navigator.clipboard.writeText(this.snapRepo.toJson());
-        }
-
-        private copyCsv() {
-            navigator.clipboard.writeText(this.snapRepo.toCsv());
-        }
-
         private toggleKind(kind: number) {
-            this.excludedKinds.toggle(kind);
-            this.dumpChartData = this.dumpRepo.toChartData(this.stepCount);
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
-            this.saveKinds();
+            this.$store.commit('toggleKind', kind);
         }
 
-        private saveRowSnapshot(meta: DumpRowMeta) {
-            this.snapRepo.pushRowMeta(meta);
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
+        private saveRowSnapshot(taggedRow: TaggedRow) {
+            this.$store.commit('pushSnapRow', taggedRow);
         }
 
-        private deleteRowSnapshot(meta: DumpRowMeta) {
-            this.snapRepo.deleteRow(meta.tag);
-            this.snapChartData = this.snapRepo.toChartData(this.stepCount);
-        }
-
-        private get dumpRows(): DumpRowMeta[] {
-            return this.computeRows(this.dumpRepo);
-        }
-
-        private get snapRows(): DumpRowMeta[] {
-            return this.computeRows(this.snapRepo);
-        }
-
-        private computeRows(repo: Repository): DumpRowMeta[] {
-            const rowSlice = repo.rowsMeta.slice(-100);
-            rowSlice.reverse();
-            return rowSlice;
-        }
-
-        private get isConnected(): boolean {
-            return this.server.isConnected;
-        }
-
-        private saveKinds(): number[] {
-            this.includedKindIndices = this.schema
-                .map((_, index) => index)
-                .filter((index) => !this.excludedKinds.isExcluded(index));
-            return this.includedKindIndices;
+        private deleteRowSnapshot(taggedRow: TaggedRow) {
+            this.$store.commit('deleteSnapRow', taggedRow.tag);
         }
     }
 </script>

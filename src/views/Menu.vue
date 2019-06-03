@@ -9,42 +9,74 @@
 
         <div class="option">
             <label>
-                <input type="checkbox" @click="$emit('pause-clicked')" v-model="isPaused">
+                <input type="checkbox" @input="pauseToggled" :value="isPaused">
                 Pause
             </label>
         </div>
 
         <div class="option">
             <label>
-                <input type="checkbox" @click="$emit('show-diffs-clicked')" v-model="showDiffs">
+                <input type="checkbox" @input="showDiffsToggled" :value="showDiffs">
                 Show Diffs
             </label>
         </div>
 
-        <div class="button clearButton" @click="$emit('clear')">Clear</div>
-        <div class="button" @click="$emit('copy-csv')">Copy Snapshot CSV</div>
-        <div class="button" @click="$emit('copy-json')">Copy Snapshot JSON</div>
-        <div class="button" @click="$emit('save-csv')">Save Snapshot CSV</div>
-        <div class="button" @click="$emit('save-json')">Save Snapshot JSON</div>
-        <div class="button" @click="$emit('save-state')">Save State</div>
-        <div class="button" @click="$emit('load-state')">Load State</div>
+        <div class="button clearButton" @click="clearRepos">Clear</div>
+        <div class="button" @click="copyCsv">Copy Snapshot CSV</div>
+        <div class="button" @click="copyJson">Copy Snapshot JSON</div>
+        <div class="button" @click="saveCsv">Save Snapshot CSV</div>
+        <div class="button" @click="saveJson">Save Snapshot JSON</div>
+        <div class="button" @click="saveState">Save State</div>
+        <div class="button" @click="loadState">Load State</div>
     </div>
 </template>
 
 <script lang="ts">
     // @ts-ignore
-    import Chart from '@/components/Chart.js';
     import {Component, Prop, Vue} from 'vue-property-decorator';
+    import {mapMutations, mapState} from 'vuex';
+    import {AppState} from '@/store';
 
     @Component({
         components: {
-            Chart,
+        },
+        computed: mapState({
+            isPaused: (state: AppState) => state.config.isPaused,
+            showDiffs: (state: AppState) => state.config.showDiffs,
+            isConnected: (state: AppState) => state.config.isConnected,
+        }),
+        methods: {
+            ...mapMutations(['clearRepos', 'showDiffsToggled', 'pauseToggled']),
         },
     })
     export default class Menu extends Vue {
-        @Prop() private isPaused!: boolean;
-        @Prop() private isConnected!: boolean;
-        @Prop() private showDiffs!: boolean;
+
+        private saveState() {
+            // const persist = new PersistState();
+            // persist.persist('snap', this.schema, this.snapRepo);
+        }
+
+        private loadState() {
+            // const persist = new PersistState();
+            // persist.load('snap', this.snapRepo);
+        }
+
+        private saveJson() {
+            // this.download('snapshot.json', this.snapRepo.toJson());
+        }
+
+        private saveCsv() {
+            // this.download('snapshot.csv', this.snapRepo.toCsv());
+        }
+
+        private copyJson() {
+            // navigator.clipboard.writeText(this.snapRepo.toJson());
+        }
+
+        private copyCsv() {
+            // navigator.clipboard.writeText(this.snapRepo.toCsv());
+        }
+
     }
 </script>
 

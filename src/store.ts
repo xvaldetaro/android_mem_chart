@@ -58,7 +58,9 @@ export default new Vuex.Store({
         },
         setSchema(state, schema) {
             state.schema = schema;
-            state.excludedIndices = schema.map(() => false);
+        },
+        setExcluded(state) {
+            state.excludedIndices = state.schema.map(() => false);
         },
         pushDumpRow({dumpRepo}, taggedRow: TaggedRow) {
             pushRow(dumpRepo, taggedRow);
@@ -78,8 +80,10 @@ export default new Vuex.Store({
             state.dumpRepo = {rows: [], tags: [], diffs: []} as Repo;
             state.snapRepo = {rows: [], tags: [], diffs: []} as Repo;
         },
-        toggleKind({excludedIndices}, index: number) {
-            excludedIndices[index] = !excludedIndices[index];
+        toggleKind(state, index: number) {
+            const aaa = state.excludedIndices.slice();
+            aaa[index] = !aaa[index];
+            state.excludedIndices = aaa;
         },
         onConnect({config}) {
             config.isConnected = true;
@@ -88,6 +92,7 @@ export default new Vuex.Store({
     actions: {
         bootstrap({commit}, {schema, loadedSnaps}) {
             commit('setSchema', schema);
+            commit('setExcluded', schema);
             commit('onConnect', true);
             commit('pushSnapRowMultiple', loadedSnaps);
         },

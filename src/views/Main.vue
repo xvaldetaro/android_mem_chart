@@ -1,5 +1,5 @@
 <template>
-    <div class="mainContainer" v-if="schema">
+    <div class="mainContainer" v-if="schema.length > 0">
         <Menu />
 
         <ChartWithTablePanel

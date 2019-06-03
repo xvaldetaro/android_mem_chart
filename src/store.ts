@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import {ChartData} from '@/services/ChartConstants';
-import {DumpRow, Schema, TaggedRow} from '@/server/SharedTypes';
+import {DumpDocument, Schema, TaggedRow} from '@/server/SharedTypes';
 import {deleteRow, pushRow, toChartData} from '@/services/Repository';
+import {loadExcluded, persistExcluded} from '@/services/PersistState';
 
 Vue.use(Vuex);
 
@@ -59,8 +59,8 @@ export default new Vuex.Store({
         setSchema(state, schema) {
             state.schema = schema;
         },
-        setExcluded(state) {
-            state.excludedIndices = state.schema.map(() => false);
+        setExcluded(state, excluded) {
+            state.excludedIndices = excluded;
         },
         pushDumpRow({dumpRepo}, taggedRow: TaggedRow) {
             pushRow(dumpRepo, taggedRow);
@@ -76,6 +76,13 @@ export default new Vuex.Store({
         deleteSnapRow({snapRepo}, tag: string) {
             deleteRow(snapRepo, tag);
         },
+        swapSnapRepo(state, doc: DumpDocument) {
+            const repo = {rows: [], tags: [], diffs: []} as Repo;
+            doc.rows.forEach((taggedRow, index) => {
+                pushRow(repo, taggedRow)
+            });
+            state.snapRepo = repo;
+        },
         clearRepos(state) {
             state.dumpRepo = {rows: [], tags: [], diffs: []} as Repo;
             state.snapRepo = {rows: [], tags: [], diffs: []} as Repo;
@@ -90,14 +97,27 @@ export default new Vuex.Store({
         },
     },
     actions: {
-        bootstrap({commit}, {schema, loadedSnaps}) {
+        bootstrap({commit, state}, {schema, loadedSnaps}) {
             commit('setSchema', schema);
-            commit('setExcluded', schema);
+            commit('setExcluded', loadExcluded(schema));
             commit('onConnect', true);
             commit('pushSnapRowMultiple', loadedSnaps);
         },
         pushDumpRow({commit, state}, taggedRow: TaggedRow) {
             commit('pushDumpRow', taggedRow);
         },
+        toggleKind({state, commit}, index: number) {
+            commit('toggleKind', index);
+            persistExcluded(state.schema, state.excludedIndices);
+        },
     },
+    // plugins: [
+    //     (store => {
+    //         store.subscribe((mutation, state) => {
+    //             if (mutation.type === 'toggleKind') {
+    //             }
+    //         });
+    //     }),
+    // ],
 });
+

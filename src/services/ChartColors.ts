@@ -1,3 +1,5 @@
+import {hashCode} from '@/services/HashCodes';
+
 const PredefinedColors = [
     '#fabebe',
     '#ffd8b1',
@@ -25,14 +27,6 @@ export function kindToColor(kind: string, index: number): string {
         return PredefinedColors[index];
     }
 };
-
-function hashCode(str: string): number { // java String#hashCode
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return hash;
-}
 
 function intToRGB(i: number) {
     const c = (i & 0x00FFFFFF)

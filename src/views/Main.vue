@@ -46,7 +46,7 @@
         computed: {
             ...mapState(['dumpRepo', 'snapRepo']),
             ...mapGetters(['dumpChartData', 'snapChartData']),
-        }
+        },
     })
     export default class Main extends Vue {
 
@@ -82,7 +82,7 @@
         }
 
         private toggleKind(kind: number) {
-            this.$store.commit('toggleKind', kind);
+            this.$store.dispatch('toggleKind', kind);
         }
 
         private saveRowSnapshot(taggedRow: TaggedRow) {

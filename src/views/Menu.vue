@@ -32,10 +32,11 @@
 </template>
 
 <script lang="ts">
-    // @ts-ignore
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {mapMutations, mapState} from 'vuex';
-    import {AppState} from '@/store';
+    import {AppState, Repo} from '@/store';
+    import {loadDocument, persistDocument} from '@/services/PersistState';
+    import {DumpDocument, Schema} from '@/server/SharedTypes';
 
     @Component({
         components: {
@@ -46,23 +47,27 @@
             isConnected: (state: AppState) => state.config.isConnected,
         }),
         methods: {
-            ...mapMutations(['clearRepos', 'showDiffsToggled', 'pauseToggled']),
+            ...mapMutations(['clearRepos', 'showDiffsToggled', 'pauseToggled', 'swapSnapRepo']),
+            ...mapState(['schema', 'snapRepo']),
         },
     })
     export default class Menu extends Vue {
+        private schema!: () => Schema;
+        private snapRepo!: () => Repo;
+        private swapSnapRepo!: (doc: DumpDocument) => void;
 
         private saveState() {
-            // const persist = new PersistState();
-            // persist.persist('snap', this.schema, this.snapRepo);
+            persistDocument('snap', this.schema(), this.snapRepo());
         }
 
         private loadState() {
-            // const persist = new PersistState();
-            // persist.load('snap', this.snapRepo);
+            const doc = loadDocument('snap');
+            if (doc) {
+                this.swapSnapRepo(doc);
+            }
         }
 
         private saveJson() {
-            // this.download('snapshot.json', this.snapRepo.toJson());
         }
 
         private saveCsv() {

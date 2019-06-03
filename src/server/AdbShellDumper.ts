@@ -48,7 +48,8 @@ const pullDumpOrEmpty = (processName: string) => () => {
 
 const parseOrEmpty = (isRaw: boolean): OperatorFunction<string, DumpRow> => switchMap((data: string) => {
     const parsed = isRaw && parseRaw(data) || parseSummary(data);
-    if (parsed == null) {
+    if (parsed == null || parsed.length === 0) {
+        console.log('couldn\'t parse output:', data);
         return EMPTY
     }
     return of(parsed)

@@ -1,13 +1,10 @@
 import {Repo} from '@/store';
 import {DumpDocument, Schema} from '@/server/SharedTypes';
 import {hashCode} from '@/services/HashCodes';
+import {toJson} from '@/services/Repository';
 
 export function persistDocument(tag: string, schema: string[], repo: Repo) {
-    const obj = {
-        rows: repo.rows.map((row, index) => ({row, tag: repo.tags[index]})),
-        schema,
-    };
-    window.localStorage.setItem(tag, JSON.stringify(obj));
+    window.localStorage.setItem(tag, toJson(schema, repo));
 }
 
 export function loadDocument(tag: string): DumpDocument | null {

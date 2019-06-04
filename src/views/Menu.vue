@@ -37,6 +37,7 @@
     import {AppState, Repo} from '@/store';
     import {loadDocument, persistDocument} from '@/services/PersistState';
     import {DumpDocument, Schema} from '@/server/SharedTypes';
+    import {toJson} from '@/services/Repository';
 
     @Component({
         components: {
@@ -68,6 +69,7 @@
         }
 
         private saveJson() {
+            this.download('snapshot.json', toJson(this.schema(), this.snapRepo()));
         }
 
         private saveCsv() {
@@ -80,6 +82,19 @@
 
         private copyCsv() {
             // navigator.clipboard.writeText(this.snapRepo.toCsv());
+        }
+
+        private download(filename: string, text: string) {
+            const pom = document.createElement('a');
+            pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            pom.setAttribute('download', filename);
+            if (document.createEvent) {
+                const event = document.createEvent('MouseEvents');
+                event.initEvent('click', true, true);
+                pom.dispatchEvent(event);
+            } else {
+                pom.click();
+            }
         }
 
     }

@@ -28,13 +28,11 @@ export function toCsv(): string {
     // return header + body;
 }
 
-export function toJson(): string {
-    return '';
-    // const rows: TaggedRow[] = this.rowsMeta.map((meta: DumpRowMeta) => {
-    //     const pureValueRow = meta.row.map((withDiff) => withDiff.value);
-    //     return {row: pureValueRow, tag: meta.tag};
-    // });
-    // return JSON.stringify({schema: this.schema, rows});
+export function toJson(schema: Schema, repo: Repo): string {
+    return JSON.stringify({
+        rows: repo.rows.map((row, index) => ({row, tag: repo.tags[index]})),
+        schema,
+    });
 }
 
 export function clear() {

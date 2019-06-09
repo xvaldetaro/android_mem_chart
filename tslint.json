@@ -19,6 +19,7 @@
     "no-trailing-whitespace": false,
     "no-console": false,
     "no-implicit-dependencies": false,
-    "no-bitwise": false
+    "no-bitwise": false,
+    "arrow-parens": false
   }
 }

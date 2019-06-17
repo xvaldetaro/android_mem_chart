@@ -1,9 +1,9 @@
 {
   "name": "android_mem_chart",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "A simple graph showing android memory usage",
   "bin": {
-    "androidmc": "src/server/androidmc"
+    "androidmc": "bin/androidmc"
   },
   "scripts": {
     "serve": "vue-cli-service serve",

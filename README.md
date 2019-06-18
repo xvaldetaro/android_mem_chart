@@ -23,4 +23,4 @@ then:
 `androidmc <process.name>`
 
 ## Screenshot
-![](https://github.com/xvaldetaro/android_mem_chart/blob/screenshots/screenshots/amc_screenshot.png?raw=true)
+![](https://github.com/xvaldetaro/android_mem_chart/blob/screenshots/screenshots/amc_animate.gif?raw=true)

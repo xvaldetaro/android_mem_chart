@@ -20,4 +20,12 @@ npm install
 ## Usage
 Find the process name. You can call `adb shell dumpsys meminfo` and see all processes there in order to pick which one.
 then:
-`androidmc <process.name>`
+
+`androidmc serve -l <process.name>`
+
+The `-l` option will launch the browser automatically pointing to `localhost:3000`
+
+If the browser is already open, just use:
+
+`androidmc serve <process.name>`
+

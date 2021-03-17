@@ -14,6 +14,7 @@ or
 git clone https://github.com/xvaldetaro/android_mem_chart
 cd android_mem_chart
 npm install
+npm run build
 ./bin/androidmc <process.name>
 ```
 

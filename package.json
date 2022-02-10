@@ -27,7 +27,7 @@
     "core-js": "^2.6.7",
     "finalhandler": "^1.1.2",
     "js-base64": "^2.5.1",
-    "node-sass": "^4.12.0",
+    "node-sass": "^7.0.0",
     "opn": "^6.0.0",
     "ramda": "^0.26.1",
     "rxjs": "^6.5.2",

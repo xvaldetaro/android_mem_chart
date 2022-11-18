@@ -22,7 +22,7 @@
     "@types/websocket": "^0.0.40",
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-typescript": "^3.7.0",
-    "@vue/cli-service": "^3.7.0",
+    "@vue/cli-service": "^5.0.8",
     "chart.js": "^2.8.0",
     "core-js": "^2.6.7",
     "finalhandler": "^1.1.2",
